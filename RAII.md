@@ -112,7 +112,7 @@ void better(const std::string& path, const std::string& data) {
 class FileGuard {
 public:
     FileGuard(const std::string& path) {
-        file = open(path.c_str(), O_RDONLY);
+        file = open(path);
     }
 
     ~FileGuard() {
@@ -125,7 +125,7 @@ public:
         }
     }
 private:
-    int file;
+    File* file;
 };
 
 void betterer(const std::string& path, const std::string& data) {
