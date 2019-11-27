@@ -2,39 +2,27 @@
 marp: true
 ---
 
-# Konstruktor:
+# Konstruktor i Destruktor:
 
-Metoda klasy/struktury, która jest automatycznie wywoływana podczas tworzenia obiektu. Może być przeciążana. W przypadku gdy programista nie napisał konstruktora do swojej klasy, C++ automatycznie tworzy domyślny konstruktor.
-
-```cpp
-class Foo {
-public:
-    Foo(int bar);
-    Foo(float baz);
-    Foo(int bar, float baz);
-};
-
-class Bar {
-public:
-    void baz();
-};
+```
+|                        |            Konstruktor           |             Destruktor            |
+|:----------------------:|:--------------------------------:|:---------------------------------:|
+|        Wywołanie       | automatycznie, tworzenie obiektu | automatycznie, destrukcja obiektu |
+|      Przeciążenia      |                Tak               |                Nie                |
+| Domyślna implementacja |                Tak               |                Tak                |
 ```
 
----
-
-# Destruktor:
-
-Metoda klasy/struktury, która jest automatycznie wywoływana podczas destrukcji obiektu. Nie przyjmują żadnych argumentów więc nie mogą być przeciążane. Gdy destruktor nie został napisany, automatycznie utworzony zostanie domyślny.
-
 ```cpp
 class Foo {
 public:
     Foo(int bar);
+    Foo(float bar);
     ~Foo();
 };
 
 class Bar {
 public:
+    // ┬┴┬┴┤\(･ω├┬┴┬┴┬┴┬┴┤_･)├┬┴┬┴
     void baz();
 };
 ```
@@ -43,7 +31,8 @@ public:
 
 # RAII - Resource Acquisition Is Initialization
 
-Inicjowanie przy pozyskaniu zasobu.
+Inicjowanie przy pozyskaniu zasobu. `ლ(ಠ_ಠ ლ)`
+
 
 Bardziej intuicyjne nazwy:
 - Constructor Acquires, Destructor Releases (CADRe)
@@ -58,7 +47,7 @@ void bad(const std::string& path, const std::string& data) {
     auto file = open(path);
 
     if (write(file, data) == -1) {
-        throw std::runtime_error("Error while writing to file");
+        throw std::runtime_error("Error while writing to file"); //(〃＞＿＜;〃)
     }
 
     close(file);
@@ -69,7 +58,7 @@ void also_bad(const std::string& path, const std::string& data) {
     auto file = open(path);
 
     if (write(file, data) == -1) {
-        close(file);
+        close(file); // (￢_￢;)
         throw std::runtime_error("Error while writing to file");
     }
 
@@ -96,7 +85,7 @@ struct FileGuard {
 
 void better(const std::string& path, const std::string& data) {
     FileGuard guard(path);
-    if (write(file, data) == -1) {
+    if (write(file, data) == -1) { // (¯ . ¯;)
         throw std::runtime_error("Error while writing to file");
     }
 }
@@ -108,7 +97,6 @@ void better(const std::string& path, const std::string& data) {
 # jeszcze lepiej
 
 ```cpp
-
 class FileGuard {
 public:
     FileGuard(const std::string& path) {
@@ -120,7 +108,7 @@ public:
     }
 
     void write(const std::string& data) {
-        if (write(file, data) {
+        if (write(file, data) == -1) {
             throw std::runtime_error("Error while writing to file");
         }
     }
@@ -128,7 +116,7 @@ private:
     File* file;
 };
 
-void betterer(const std::string& path, const std::string& data) {
+void betterer(const std::string& path, const std::string& data) { //＼(＾▽＾)／
     FileGuard file(path);
     file.write(data);
 }
@@ -150,6 +138,6 @@ open(), close(), init(), deinit(), lock(), unlock(), copy(), destroy() itp
 
 ---
 
-# Do poczytania
+#  (－_－) zzZ
 
 https://www.fluentcpp.com/2018/02/13/to-raii-or-not-to-raii/
