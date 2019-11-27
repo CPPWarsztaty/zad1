@@ -2,142 +2,111 @@
 marp: true
 ---
 
-# Konstruktor i Destruktor:
+# Jak będziemy pisać:
 
-```
-|                        |            Konstruktor           |             Destruktor            |
-|:----------------------:|:--------------------------------:|:---------------------------------:|
-|        Wywołanie       | automatycznie, tworzenie obiektu | automatycznie, destrukcja obiektu |
-|      Przeciążenia      |                Tak               |                Nie                |
-| Domyślna implementacja |                Tak               |                Tak                |
-```
+1. Nie używamy new, delete, malloc, free itp.
+2. Nie używamy NULL
+3. Używamy auto
+4. Nie piszemy komentarzy z redundantnymi informacjami
+5. Implementacja odseparowana od nagłówka
+6. Nie wymyślamy koła na nowo
+
+---
+
+# new, delete, malloc, free itp.
 
 ```cpp
 class Foo {
 public:
-    Foo(int bar);
-    Foo(float bar);
-    ~Foo();
-};
-
-class Bar {
-public:
-    // ┬┴┬┴┤\(･ω├┬┴┬┴┬┴┬┴┤_･)├┬┴┬┴
-    void baz();
+    void bar() { throw std::exception(); }
 };
 ```
 
----
+```cpp
+auto foo = new Foo();
+foo->bar(); // (┛ಠ_ಠ)┛彡┻━┻
+delete foo;
+```
 
-# RAII - Resource Acquisition Is Initialization
-
-Inicjowanie przy pozyskaniu zasobu. `ლ(ಠ_ಠ ლ)`
-
-
-Bardziej intuicyjne nazwy:
-- Constructor Acquires, Destructor Releases (CADRe)
-- Scope-Bound Resource Management (SBRM)
+Używając powyższych operatorów i funkcji w C++ zwiększamy ryzyko błędów.
 
 ---
 
-# źle 
+# NULL
+
+W C++11 `NULL` został zastąpiony przez `nullptr`, by odróżnić nullowe wskaźniki od innych typów. W C `NULL` to po prostu `0`.
 
 ```cpp
-void bad(const std::string& path, const std::string& data) {
-    auto file = open(path);
-
-    if (write(file, data) == -1) {
-        throw std::runtime_error("Error while writing to file"); //(〃＞＿＜;〃)
-    }
-
-    close(file);
+void foo(int variable) {
+    std::cout << "It's an integer: " << variable << std::endl;
+}
+void foo(int* variable) {
+    std::cout << "It's a pointer: " << variable << std::endl;
 }
 ```
+(•ิ_•ิ)?
 ```cpp
-void also_bad(const std::string& path, const std::string& data) {
-    auto file = open(path);
-
-    if (write(file, data) == -1) {
-        close(file); // (￢_￢;)
-        throw std::runtime_error("Error while writing to file");
-    }
-
-    close(file);
-}
+foo(NULL);
+foo(nullptr);
+foo(0);
 ```
 
 ---
 
-# lepiej
+# auto
+
+W standardzie C++11 zostało wprowadzone słowo kluczowe `auto`. Umożliwia ono automatyczną dedukcję typu, co znacznie poprawia czytelność kodu:
 
 ```cpp
-struct FileGuard {
-    FileGuard(const std::string& path) {
-        file = open(path);
-    }
+std::unordered_map<std::string, boost::optional<int>> map;
+std::unordered_map<std::string, boost::optional<int>>::const_iterator iterator = map.begin();
 
-    ~FileGuard() {
-        close(file);
-    }
-
-    File* file;
-};
-
-void better(const std::string& path, const std::string& data) {
-    FileGuard guard(path);
-    if (write(file, data) == -1) { // (¯ . ¯;)
-        throw std::runtime_error("Error while writing to file");
-    }
-}
-
+(＞﹏＜)
 ```
+
+
+
+(つ✧ω✧)つ `auto iterator = map.begin();`
 
 ---
 
-# jeszcze lepiej
+# nadmiarowe komentarze
 
 ```cpp
-class FileGuard {
-public:
-    FileGuard(const std::string& path) {
-        file = open(path);
-    }
-
-    ~FileGuard() {
-        close(file);
-    }
-
-    void write(const std::string& data) {
-        if (write(file, data) == -1) {
-            throw std::runtime_error("Error while writing to file");
-        }
-    }
-private:
-    File* file;
-};
-
-void betterer(const std::string& path, const std::string& data) { //＼(＾▽＾)／
-    FileGuard file(path);
-    file.write(data);
-}
-
+// this method removes key
+void remove(const KeyType& key);
 ```
 
----
+```cpp
+// Key not found, throwing exception
+throw std::runtime_error("Couldn't find key:" + key);
+```
+┐(￣ヘ￣;)┌
+Po co? 
 
-# Przykładowe możliwości użycia RAII:
-- otwieranie socketu
-- pliku
-- alokowanie pamięci
-- blokowanie mutexa
-- otwieranie połączenia do bazy danych
-- ...
+--- 
 
-Zwracamy uwagę na metody i funkcje typu: 
-open(), close(), init(), deinit(), lock(), unlock(), copy(), destroy() itp
+# Implementacja odseparowana od nagłówka
 
----
+Odseparownie implementacji metod i funkcji do pliku .cpp przyśpiesza kompilacje i zwiększa czytelność (przynajmniej wg mnie)
 
-#  (－_－) zzZ
+--- 
 
-https://www.fluentcpp.com/2018/02/13/to-raii-or-not-to-raii/
+# Nie wymyślamy koła na nowo
+i korzystamy z dokumentacji. cppreference.com przyjacielem `(*＾ω＾)人(＾ω＾*)`
+
+```cpp
+const auto MAX_ITERATIONS = 100ul;
+for (auto i = 0ul; i < data.size() < MAX_ITERATIONS ? data.size() : MAX_ITERATIONS; ++i) {
+    process(data[i]);
+}
+```
+
+⬇  ⬇⬇  ⬇⬇  ⬇⬇  ⬇⬇  ⬇⬇  ⬇⬇  ⬇
+
+```cpp
+const auto MAX_ITERATIONS = 100ul;                                                       
+for (auto i = 0ul; i < std::min(data.size(), MAX_ITERATIONS); ++i)
+    process(data[i]);
+}
+```
